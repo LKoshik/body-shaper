@@ -1,0 +1,59 @@
+/* Phase 10: bones, capsules, joint dots, locked sliders */
+#bones{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+[data-screen=shape] #bones,body.hide-bones #bones{display:none}
+#bones .cap{stroke-linecap:round;fill:none}
+#bones .cap.arm{stroke:rgba(242,194,48,.38)}
+#bones .cap.leg{stroke:rgba(110,190,255,.38)}
+#bones .cap.rigid{stroke:rgba(240,120,170,.42)}
+#bones .chest{fill:rgba(255,150,120,.2);stroke:rgba(255,150,120,.8);stroke-width:2}
+#bones .bone{stroke:#fff;stroke-width:2;stroke-linecap:round;fill:none}
+#bones .bone.thin{stroke-width:1;opacity:.7}
+#bones .handle{fill:#fff;stroke:var(--ink);stroke-width:2;pointer-events:auto;cursor:ew-resize;touch-action:none}
+.dot.ext{width:20px;height:20px;background:#fff}
+.dot.ext b{font-size:9px}
+.dot.ext span{top:24px}
+@media (pointer:coarse){.dot.ext{width:30px;height:30px}.dot.ext b{font-size:11px}}
+
+.sl-group{margin:16px 0 8px;font-size:.95rem}
+.sl .why{grid-column:1/-1;font-size:.82rem;opacity:.8;margin-top:-2px}
+.sl.locked label,.sl.locked output{opacity:.5}
+.sl input:disabled{opacity:.4}
+#dots.small .dot{width:16px;height:16px}
+#dots.small .dot b{font-size:8px}
+#dots.small .dot span{top:20px}
+@media (pointer:coarse){#dots.small .dot{width:26px;height:26px}#dots.small .dot b{font-size:10px}}
+
+/* Phase 13: custom parts */
+#partsvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#partsvg .pc{fill:rgba(255,200,60,.25);stroke:#fff;stroke-width:2;stroke-dasharray:6 4}
+body.adding #stage{cursor:crosshair}
+#part-form{margin:10px 0}
+#part-form .row{margin-top:6px}
+.sl .rm{margin-left:4px}
+
+/* Phase 14: realism tools */
+.sl input::-webkit-slider-runnable-track{background:var(--track,var(--edge))}
+.sl input::-moz-range-track{background:var(--track,var(--edge))}
+#sliders[data-split="0"] .sl-side{display:none}
+#sliders[data-split="1"] .sl-main{display:none}
+.tools{margin:10px 0;padding:6px 10px 10px;border:1px solid var(--edge);border-radius:4px}
+.tools summary{cursor:pointer;font-weight:700;padding:6px 0}
+.tools .chk{margin:6px 0}
+.hint-text{opacity:.65;font-size:.85rem}
+.lk{display:grid;grid-template-columns:1fr auto;align-items:center;gap:0 8px;margin:8px 0;font-size:.95rem}
+.lk output{opacity:.7;font-variant-numeric:tabular-nums}
+.lk input{grid-column:1/-1;width:100%;margin:0;height:30px}
+.lk .note{grid-column:1/-1;margin:2px 0 0}
+.hints{list-style:none;margin:10px 0;padding:8px 10px;border-left:4px solid var(--tape);background:#fff8e1;font-size:.9rem}
+.hints li+li{margin-top:4px}
+#meter,#maskview,#guides{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#maskview{opacity:.4}
+body.painting #maskview{opacity:.7}
+body.painting #stage{cursor:crosshair}
+[data-screen=mark] #meter,[data-screen=mark] #maskview,[data-screen=mark] #guides{display:none}
+#guides .gl{stroke:rgba(255,255,255,.6);stroke-width:1;stroke-dasharray:5 4}
+#guides .gl.key{stroke:#f2c230;stroke-width:1.5;stroke-dasharray:none}
+#guides .gt{fill:#fff;font-size:11px;paint-order:stroke;stroke:rgba(0,0,0,.65);stroke-width:3px}
+
+/* The help text under the picture keeps room for 4 lines, so the picture does not jump while you place points on a phone */
+#mark-help{min-height:5.6em}

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Body Shaper</title>
+  <meta name="theme-color" content="#222222">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="limbs.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body data-screen="upload">
+  <header>
+    <h1>Body Shaper</h1><span id="step"></span>
+    <button id="help" type="button" aria-label="How to use this app" title="How to use">?</button>
+  </header>
+  <main>
+    <section id="s-upload">
+      <label id="drop" for="file">
+        <strong>Drop your character picture here</strong>
+        <span>or tap to choose</span>
+        <small>Works best with a front-facing, full-body character standing straight.</small>
+      </label>
+      <input id="file" type="file" accept="image/*" hidden>
+      <p id="err" role="alert"></p>
+    </section>
+    <section id="s-work">
+      <div id="stage-wrap"><div id="stage"><canvas id="meter" aria-hidden="true"></canvas><canvas id="maskview" aria-hidden="true" hidden></canvas><svg id="bones" aria-hidden="true"></svg><svg id="partsvg" aria-hidden="true"></svg><svg id="guides" aria-hidden="true"></svg><div id="dots"></div><div id="badge" hidden>Original</div></div></div>
+      <aside id="panel">
+        <div id="mark-panel">
+          <p id="mark-help"></p>
+          <div class="row">
+            <button id="undo">Undo</button>
+            <button id="reset-pts">Reset points</button>
+            <button id="done" class="primary">Done</button>
+          </div>
+          <div class="row">
+            <button id="mirror" type="button" title="Copy joint points from one side of the body to the other">Mirror assist</button>
+            <button id="guess" type="button" title="Place a first guess on the joints that are missing">Smart guesses</button>
+            <label class="chk"><input type="checkbox" id="show-bones" checked> Show bones</label>
+          </div>
+        </div>
+        <div id="shape-panel">
+          <div class="bar">
+            <button id="sl-undo" type="button" title="Undo (Ctrl+Z)">↶ Undo</button>
+            <button id="sl-redo" type="button" title="Redo (Ctrl+Y)">↷ Redo</button>
+            <button id="reset-all" type="button">Reset all</button>
+            <button id="compare" type="button" class="hold">Hold to compare</button>
+            <button id="download" type="button" class="primary">Download</button>
+          </div>
+          <details class="tools" open>
+            <summary>Realism tools</summary>
+            <label class="chk"><input type="checkbox" id="creative"> Creative range <span class="hint-text">(the orange part of each slider)</span></label>
+            <label class="chk"><input type="checkbox" id="sym" checked> Symmetry lock <span class="hint-text">(left = right)</span></label>
+            <div class="lk">
+              <label for="link">Link strength</label><output id="link-out">100%</output>
+              <input type="range" id="link" min="0" max="100" step="5" value="100" aria-describedby="link-note">
+              <small id="link-note" class="note">Neighbors follow a little: hip width also thickens the thighs, and the other way round; chest size widens the upper torso. 0 = full manual control.</small>
+            </div>
+            <label class="chk"><input type="checkbox" id="guides-on"> Proportion guides</label>
+            <label class="chk"><input type="checkbox" id="meter-on"> Stretch meter <span class="hint-text">(blue = squeezed, red = stretched)</span></label>
+            <div class="row">
+              <button id="brush-toggle" type="button" title="Paint over an area that must not change, like a logo or a held weapon">Protect brush</button>
+              <label class="chk"><input type="checkbox" id="frozen-show" checked> Show frozen areas</label>
+            </div>
+            <div id="brush-opts" hidden>
+              <p class="note">Paint over what must stay still. The original picture is shown while you paint.</p>
+              <div class="row">
+                <label class="chk">Size <input type="range" id="brush-size" min="3" max="40" value="14"></label>
+                <label class="chk"><input type="checkbox" id="brush-erase"> Erase</label>
+                <button id="brush-clear" type="button">Clear all</button>
+              </div>
+            </div>
+          </details>
+          <ul id="hints" class="hints" aria-live="polite" hidden></ul>
+          <div id="sliders"></div>
+          <div class="row">
+            <button id="add-part" type="button" title="Add your own part, like a belly or a bicep, with its own size slider">+ Custom part</button>
+          </div>
+          <div id="part-form" hidden>
+            <p id="part-help" class="note"></p>
+            <div class="row">
+              <input id="part-name" type="text" maxlength="24" placeholder="Name (belly, bicep...)" autocomplete="off" aria-label="Part name" hidden>
+              <button id="part-ok" type="button" class="primary" hidden>Add</button>
+              <button id="part-cancel" type="button">Cancel</button>
+            </div>
+          </div>
+          <section class="presets">
+            <h2>Presets</h2>
+            <div class="row">
+              <input id="preset-name" type="text" maxlength="30" placeholder="Preset name" autocomplete="off" aria-label="Preset name">
+              <button id="preset-save" type="button">Save preset</button>
+            </div>
+            <p id="preset-empty" class="note">No presets yet. Make a look, type a name, and press Save.</p>
+            <ul id="preset-list"></ul>
+          </section>
+          <div class="row">
+            <button id="back" type="button">Edit points</button>
+            <label class="chk"><input type="checkbox" id="grid"> Show grid</label>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <dialog id="export" aria-labelledby="export-h">
+    <h2 id="export-h">Download picture</h2>
+    <fieldset>
+      <legend>Background</legend>
+      <label class="chk"><input type="radio" name="bg" value="clear" checked> Transparent</label>
+      <label class="chk"><input type="radio" name="bg" value="solid"> Solid color <input type="color" id="bg-color" value="#ffffff" disabled aria-label="Background color"></label>
+    </fieldset>
+    <fieldset>
+      <legend>Size</legend>
+      <label class="chk"><input type="radio" name="size" value="full" checked> <span id="size-full"></span></label>
+      <label class="chk"><input type="radio" name="size" value="prev"> <span id="size-prev"></span></label>
+    </fieldset>
+    <p class="note">The file is a PNG.</p>
+    <div class="row">
+      <button id="export-cancel" type="button">Cancel</button>
+      <button id="export-go" type="button" class="primary">Download</button>
+    </div>
+  </dialog>
+
+  <dialog id="tut" aria-labelledby="tut-h">
+    <h2 id="tut-h"></h2>
+    <p class="tut-text"></p>
+    <p class="tut-dots" aria-hidden="true"></p>
+    <div class="row">
+      <button class="skip" type="button">Skip</button>
+      <button class="back" type="button">Back</button>
+      <button class="next primary" type="button">Next</button>
+    </div>
+  </dialog>
+
+  <div id="busy" hidden role="status" aria-live="polite"><div class="spin"></div><p id="busy-msg"></p></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="src/main.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    }
+  </script>
+</body>
+</html>
